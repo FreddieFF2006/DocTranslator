@@ -4,14 +4,27 @@ import shutil
 import asyncio
 import datetime
 from pathlib import Path
-from babeldoc.docvision.table_detection.rapidocr import RapidOCRModel
 from . import common, db, to_translate
-import babeldoc.high_level
-from babeldoc.document_il.translator.translator import OpenAITranslator
-from babeldoc.docvision.doclayout import DocLayoutModel
-from babeldoc.translation_config import TranslationConfig, WatermarkOutputMode
 
 logger = logging.getLogger(__name__)
+
+# Try to import BabelDOC - it's optional for Windows compatibility
+try:
+    from babeldoc.docvision.table_detection.rapidocr import RapidOCRModel
+    import babeldoc.high_level
+    from babeldoc.document_il.translator.translator import OpenAITranslator
+    from babeldoc.docvision.doclayout import DocLayoutModel
+    from babeldoc.translation_config import TranslationConfig, WatermarkOutputMode
+    BABELDOC_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"BabelDOC not available: {e}. PDF translation features will be limited.")
+    BABELDOC_AVAILABLE = False
+    # Define dummy classes/variables to prevent NameError
+    RapidOCRModel = None
+    OpenAITranslator = None
+    DocLayoutModel = None
+    TranslationConfig = None
+    WatermarkOutputMode = None
 
 
 def clean_output_filename(original_path: Path, output_dir: str) -> Path:
@@ -41,6 +54,13 @@ def clean_output_filename(original_path: Path, output_dir: str) -> Path:
 async def async_translate_pdf(trans):
     """异步PDF翻译核心函数"""
     try:
+        # Check if BabelDOC is available
+        if not BABELDOC_AVAILABLE:
+            raise ImportError(
+                "BabelDOC is not installed. PDF translation requires BabelDOC library. "
+                "Please install it with: pip install babeldoc"
+            )
+
         start_time = datetime.datetime.now()
         original_path = Path(trans['file_path'])
 
