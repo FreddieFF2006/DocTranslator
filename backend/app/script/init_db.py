@@ -28,16 +28,21 @@ def safe_init_mysql(app: Flask, sql_file: str = 'init.sql') -> bool:
 
     with app.app_context():
         try:
-            # 跨平台路径处理
-            sql_path = get_platform_path(sql_file)
-            if not sql_path.exists():
-                logger.warning(f"SQL文件 {sql_path} 不存在，跳过初始化")
-                return False
-
             # 获取数据库配置（兼容环境变量）
             db_url = app.config.get('SQLALCHEMY_DATABASE_URI', os.getenv('PROD_DATABASE_URL'))
             if not db_url:
                 logger.error("数据库配置未找到")
+                return False
+
+            # 检查是否为SQLite数据库，如果是则跳过MySQL初始化
+            if db_url.startswith('sqlite:'):
+                logger.info("检测到SQLite数据库，跳过MySQL初始化脚本")
+                return False
+
+            # 跨平台路径处理
+            sql_path = get_platform_path(sql_file)
+            if not sql_path.exists():
+                logger.warning(f"SQL文件 {sql_path} 不存在，跳过初始化")
                 return False
 
             # 解析连接信息（增强兼容性）
