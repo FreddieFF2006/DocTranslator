@@ -38,9 +38,7 @@ Shapely==2.0.7
 
 # AI & 翻译相关
 tiktoken
-# BabelDOC==0.3.17  # Commented out - requires rapidocr-onnxruntime not available on Windows
-# For Windows: Use Docker or install manually with: pip install rapidocr-paddle (alternative OCR)
-# For Linux/Mac: Uncomment the line above
+BabelDOC==0.3.17  # Works in Docker (Linux). For local Windows dev, comment this out.
 
 # 其他工具
 python-dotenv==1.0.1
