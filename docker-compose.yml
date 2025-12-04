@@ -2,33 +2,38 @@ version: '3'
 
 services:
   backend:
-    image: eggsunsky/doctranslator:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend-container
     ports:
       - "5000:5000"
     volumes:
       - ./backend/db:/app/db
     environment:
-      - FLASK_ENV=production
-      - SECRET_KEY=your-secret-key
-      # 开发环境数据库（SQLite）
-      # - DEV_DATABASE_URL=sqlite:////app/db/dev.db
-      # 生产环境数据库 使用mysql
-      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:pwd@localhost/xxxx
-      - PROD_DATABASE_URL=mysql+pymysql://user:pwd@localhost/xxxx
+      - FLASK_ENV=development
+      - SECRET_KEY=docker-secret-key-change-in-production-12345
+      # 开发环境数据库（SQLite）- Using SQLite for simplicity
+      - SQLALCHEMY_DATABASE_URI=sqlite:////app/db/dev.db
+      # 生产环境数据库 使用mysql (uncomment and configure for production)
+      # - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:pwd@mysql-host/dbname
+      # - PROD_DATABASE_URL=mysql+pymysql://user:pwd@mysql-host/dbname
       # JWT 配置
-      - JWT_SECRET_KEY=sxxxxxx
+      - JWT_SECRET_KEY=jwt-secret-key-change-in-production-54321
       - JWT_ACCESS_TOKEN_EXPIRES=172800
-      # 邮箱配置
-      - MAIL_SERVER=smtp.qq.com
-      - MAIL_PORT=587
-      - MAIL_USE_TLS=true
-      - MAIL_USERNAME=xxxx@qq.com
-      - MAIL_PASSWORD=xxxxxx
-      - MAIL_DEFAULT_SENDER=ixxxx@qq.com
-      - ALLOWED_EMAIL_DOMAINS=qq.com,163.com,126.com
+      # 邮箱配置 (optional - comment out if not needed)
+      # - MAIL_SERVER=smtp.gmail.com
+      # - MAIL_PORT=587
+      # - MAIL_USE_TLS=true
+      # - MAIL_USERNAME=your-email@gmail.com
+      # - MAIL_PASSWORD=your-app-password
+      # - MAIL_DEFAULT_SENDER=your-email@gmail.com
+      # - ALLOWED_EMAIL_DOMAINS=gmail.com,qq.com,163.com
       # 跨域 允许的域名
       - ALLOWED_DOMAINS=*
+      # 文件上传配置
+      - MAX_FILE_SIZE=30
+      - MAX_USER_STORAGE=100
     networks:
       - my-network
 
