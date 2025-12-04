@@ -10,15 +10,15 @@ _ = load_dotenv(find_dotenv()) # read local .env file
 
 def get_conn():
     try:
-        # 获取数据库 URL
-        db_url = os.environ.get('PROD_DATABASE_URL')
+        # 获取数据库 URL - Try DEV first, then PROD
+        db_url = os.environ.get('DEV_DATABASE_URL') or os.environ.get('PROD_DATABASE_URL') or os.environ.get('SQLALCHEMY_DATABASE_URI')
         if not db_url:
             raise ValueError("Database URL not found in environment variables.")
 
-        # 判断是否是 SQLite 链接
-        if db_url.startswith('sqlite:///'):
+        # 判断是否是 SQLite 链接 (支持 sqlite:/// 和 sqlite:////)
+        if db_url.startswith('sqlite:'):
             # 保留原有的 SQLite 逻辑
-            sqlite_db_path = db_url[len('sqlite:///'):]
+            sqlite_db_path = db_url.replace('sqlite:///', '').replace('sqlite://', '')
             conn = sqlite3.connect(sqlite_db_path)
             print('数据库链接')
             # conn = sqlite3.connect(db_url)
